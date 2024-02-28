@@ -36,21 +36,70 @@ public class PhonebookController {
 	// 메소드gs
 
 	// 메소드 일반
+	
+	//등록 리다이렉트
+	/************************************************************
+	 * list --> list 메서드를 통해 전체 연락처 리스트를 조회
+	 **********************************************************/
 
-	/*******************************************************
-	 * 삭제--> delete 메서드를 통해 전화번호부에서 선택한 연락처를 삭제
-	 *******************************************************/
-	// 삭제
-	@RequestMapping(value = "/phone/delete", method = { RequestMethod.GET, RequestMethod.POST })
-	public String delete(@RequestParam("no") int no) {//@RequestParam어노테이션을 사용하여 요청 파라미터인 "no"값을 가져오고, 이 값을 int타입의 변수 no에 저장한다.
-		System.out.println("PhonebookController.delete()");
+	@RequestMapping(value = "/phone/list", method = { RequestMethod.GET, RequestMethod.POST })
+	public String list(Model model) {// Model에서attribute에 담아야할때만 써준다. model은 데이터, view는 화면이다.
+		System.out.println("PhonebookController.list()");
 
-		System.out.println(no);
+		//자동연결@Autowired
+		//PhonebookService phonebookService = new PhonebookService();
+		List<PersonVo> personList = phonebookService.exeList();
 
-		PhonebookService phonebookService = new PhonebookService();
-		phonebookService.exeDelete(no);
+		// PhonebookDao phonebookDao= new PhonebookDao();
+
+		// List<PersonVo> personList=phonebookDao.personSelect();
+		//System.out.println(personList);
+
+		model.addAttribute("pList", personList);// 별명, 진짜 주소
+
+		return "list";
+	}
+
+	/***********************************
+	 * 등록2 묶어서 받는거
+	 *********************************/
+	// http://localhost:8080/phonebook5(여기까지
+	// 공통주소/phone/write?name=오지원&hp=010&company=02
+	@RequestMapping(value = "/phone/write2", method = { RequestMethod.GET, RequestMethod.POST })
+	public String write2(@ModelAttribute PersonVo personVo) {
+		System.out.println("PhonebookController.write2()");
+
+		System.out.println(personVo.toString());
+
+		// 서비스를 메모리에 올리고
+
+		// 서비스의 메소드 사용
+		//PhonebookService phonebookService = new PhonebookService();
+		//phonebookService.exeWrite(personVo);
+
+		// dao를 메모리에 올린다
+		//PhonebookDao phonebookDao = new PhonebookDao();
+
+		// dao.personInt(vo) 저장
+		//phonebookDao.personInsert(personVo);
+		phonebookService.exeWrite(personVo);
 
 		return "redirect:/phone/list";
+	}
+	
+	/***********************************
+	 * 수정폼
+	 *********************************/
+	@RequestMapping(value = "/phone/modifyform", method = { RequestMethod.GET, RequestMethod.POST })
+	public String modifyForm(@RequestParam(value = "no") int no, Model model) {
+		System.out.println("PhonebookController.modifyForm()");
+		System.out.println(no);
+
+		//PhonebookService phonebookService = new PhonebookService();
+		PersonVo personVo = phonebookService.exeModifyForm(no);
+
+		model.addAttribute("personVo", personVo);
+		return "modifyForm";
 	}
 
 	/**************************************************************
@@ -65,25 +114,38 @@ public class PhonebookController {
 
 		//PhonebookService phonebookService = new PhonebookService();
 		
+		return "redirect:/phone/list";
+	}
+	
+	/*******************************************************
+	 * 삭제--> delete 메서드를 통해 전화번호부에서 선택한 연락처를 삭제
+	 *******************************************************/
+	// 삭제
+	@RequestMapping(value = "/phone/delete", method = { RequestMethod.GET, RequestMethod.POST })
+	public String delete(@RequestParam("no") int no) {//@RequestParam어노테이션을 사용하여 요청 파라미터인 "no"값을 가져오고, 이 값을 int타입의 변수 no에 저장한다.
+		System.out.println("PhonebookController.delete()");
+
+		System.out.println(no);
+
+		//PhonebookService phonebookService = new PhonebookService();
+		phonebookService.exeDelete(no);
 
 		return "redirect:/phone/list";
 	}
 
-	/***********************************
-	 * 수정폼
-	 *********************************/
-	@RequestMapping(value = "/phone/modifyform", method = { RequestMethod.GET, RequestMethod.POST })
-	public String modifyForm(@RequestParam(value = "no") int no, Model model) {
-		System.out.println("PhonebookController.modifyForm()");
-		System.out.println(no);
 
-		PhonebookService phonebookService = new PhonebookService();
-		PersonVo personVo = phonebookService.exeModifyForm(no);
 
-		model.addAttribute("personVo", personVo);
-		return "modifyForm";
-	}
-
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/************************************************************
 	 * 등록폼 --> writeForm 메서드를 통해 연락처를 등록하는 폼을 조회가능
 	 ***********************************************************/
@@ -113,63 +175,18 @@ public class PhonebookController {
 		PersonVo personVo = new PersonVo(name, hp, company);
 
 		// dao메모리에 올린다
-		PhonebookDao phonebookDao = new PhonebookDao();
+		//PhonebookDao phonebookDao = new PhonebookDao();
 
 		// dao.personInsert(vo)저장한다.
-		phonebookDao.personInsert(personVo);
+		//phonebookDao.personInsert(personVo);
+		phonebookService.exeWrite(personVo);
 
 		// 리스트로 리다이렉트
 		return "redirect:/phone/list";
 
 	}
 	
-	/***********************************
-	 * 등록2
-	 *********************************/
-	// http://localhost:8080/phonebook5(여기까지
-	// 공통주소/phone/write?name=오지원&hp=010&company=02
-	@RequestMapping(value = "/phone/write2", method = { RequestMethod.GET, RequestMethod.POST })
-	public String write2(@ModelAttribute PersonVo personVo) {
-		System.out.println("PhonebookController.write2()");
 
-		System.out.println(personVo.toString());
 
-		// 서비스를 메모리에 올리고
-
-		// 서비스의 메소드 사용
-		PhonebookService phonebookService = new PhonebookService();
-		phonebookService.exeWrite(personVo);
-
-		// dao를 메모리에 올린다
-		PhonebookDao phonebookDao = new PhonebookDao();
-
-		// dao.personInt(vo) 저장
-		phonebookDao.personInsert(personVo);
-
-		return "redirect:/phone/list";
-	}
-
-	// 등록 리다이렉트
-	/************************************************************
-	 * list --> list 메서드를 통해 전체 연락처 리스트를 조회
-	 **********************************************************/
-
-	@RequestMapping(value = "/phone/list", method = { RequestMethod.GET, RequestMethod.POST })
-	public String list(Model model) {// Model에서attribute에 담아야할때만 써준다. model은 데이터, view는 화면이다.
-		System.out.println("PhonebookController.list()");
-
-		//자동연결@Autowired
-		//PhonebookService phonebookService = new PhonebookService();
-		List<PersonVo> personList = phonebookService.exeList();
-
-		// PhonebookDao phonebookDao= new PhonebookDao();
-
-		// List<PersonVo> personList=phonebookDao.personSelect();
-		System.out.println(personList);
-
-		model.addAttribute("pList", personList);// 별명, 진짜 주소
-
-		return "list";
-	}
 
 }
